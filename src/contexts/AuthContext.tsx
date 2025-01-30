@@ -35,29 +35,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    if (appConfig.isDevelopment) {
-      const devUser: SystemUser = {
-        id: 'dev-user',
-        username: 'Dev User',
-        role: 'master',
-        nature_type: 'profit',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-      setUser(devUser);
-      localStorage.setItem('user', JSON.stringify(devUser));
-      setIsAuthenticated(true);
-      return true;
-    }
+    try {
+      if (appConfig.isDevelopment) {
+        const devUser: SystemUser = {
+          id: 'dev-user',
+          username: 'Dev User',
+          role: 'master',
+          nature_type: 'profit',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setUser(devUser);
+        localStorage.setItem('user', JSON.stringify(devUser));
+        setIsAuthenticated(true);
+        return true;
+      }
 
-    const user = await getUserByUsername(email);
-    if (user && user.password === password) {
-      setUser(user);
-      localStorage.setItem('user', JSON.stringify(user));
-      setIsAuthenticated(true);
-      return true;
+      const user = await getUserByUsername(email);
+      if (user && user.password === password) {
+        setUser(user);
+        localStorage.setItem('user', JSON.stringify(user));
+        setIsAuthenticated(true);
+        return true;
+      }
+      throw new Error('Invalid email or password');
+    } catch (error) {
+      console.error('Login failed:', error);
+      return false;
     }
-    return false;
   };
 
   const logout = () => {

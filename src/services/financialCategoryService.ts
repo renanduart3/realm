@@ -19,7 +19,7 @@ export const financialCategoryService = {
       await db.financialCategories.add(newCategory);
       return newCategory;
     } catch (error) {
-      console.error("Error creating new category", error);
+      console.error("FinancialCategoryService - Error creating new category", error);
       return null;
     }
   },
@@ -29,7 +29,7 @@ export const financialCategoryService = {
       const category = await db.financialCategories.get(id);
       return category || null;
     } catch (error) {
-      console.error("Error getting category", error);
+      console.error("FinancialCategoryService - Error getting category", error);
       return null;
     }
   },
@@ -39,7 +39,7 @@ export const financialCategoryService = {
       const categories = await db.financialCategories.toArray();
       return categories;
     } catch (error) {
-      console.error("Error getting all categories", error);
+      console.error("FinancialCategoryService - Error getting all categories", error);
       return [];
     }
   },
@@ -54,7 +54,7 @@ export const financialCategoryService = {
       await db.financialCategories.put(updatedCategory);
       return updatedCategory;
     } catch (error) {
-      console.error("Error editing category", error);
+      console.error("FinancialCategoryService - Error editing category", error);
       return null;
     }
   },
@@ -64,7 +64,7 @@ export const financialCategoryService = {
       await db.financialCategories.delete(id);
       return true;
     } catch (error) {
-      console.error("Error deleting category", error);
+      console.error("FinancialCategoryService - Error deleting category", error);
       return false;
     }
   }

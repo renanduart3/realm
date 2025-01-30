@@ -22,6 +22,7 @@ import SubscriptionPlans from './pages/SubscriptionPlans';
 import SubscriptionStatus from './pages/SubscriptionStatus';
 import SetupWizard from './pages/SetupWizard';
 import 'react-toastify/dist/ReactToastify.css';
+import FullSale from './pages/FullSale';
 
 function App() {
   useEffect(() => {
@@ -81,6 +82,7 @@ function PrivateRoutes() {
                     <Route path="/subscription-plans" element={<SubscriptionPlans />} />
                     <Route path="/subscription" element={<SubscriptionStatus />} />
                     <Route path="/setup" element={<SetupWizard />} />
+                    <Route path="/sales/full-sale" element={<FullSale />} />
                   </Routes>
                 </main>
               </div>

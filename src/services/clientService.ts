@@ -25,7 +25,7 @@ export const clientService = {
       await db.clients.add(newClient);
       return newClient;
     } catch (error) {
-      console.error("Error creating new client", error);
+      console.error("ClientService - Error creating new client", error);
       return null;
     }
   },
@@ -35,7 +35,7 @@ export const clientService = {
       const client = await db.clients.get(id);
       return client || null;
     } catch (error) {
-      console.error("Error getting client", error);
+      console.error("ClientService - Error getting client", error);
       return null;
     }
   },
@@ -45,7 +45,7 @@ export const clientService = {
       const clients = await db.clients.toArray();
       return clients;
     } catch (error) {
-      console.error("Error getting all clients", error);
+      console.error("ClientService - Error getting all clients", error);
       return [];
     }
   },
@@ -60,7 +60,7 @@ export const clientService = {
       await db.clients.put(updatedClient);
       return updatedClient;
     } catch (error) {
-      console.error("Error editing client", error);
+      console.error("ClientService - Error editing client", error);
       return null;
     }
   },
@@ -70,7 +70,7 @@ export const clientService = {
       await db.clients.delete(id);
       return true;
     } catch (error) {
-      console.error("Error deleting client", error);
+      console.error("ClientService - Error deleting client", error);
       return false;
     }
   }

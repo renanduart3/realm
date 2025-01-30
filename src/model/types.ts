@@ -68,10 +68,13 @@ export interface PaymentError {
     timestamp: string;
 }
 export interface SaleItem extends BaseEntity {
+    product: string;
+    quantity: number;
     sale_id: string;
     product_service_id: string;
-    quantity: number;
 }
+
+
 
 export interface FinancialCategory extends BaseEntity {
     name: string;
@@ -160,30 +163,30 @@ export interface RecurringExpense extends BaseEntity {
 export interface DemandPrediction {
     topProducts: { name: string; predictedDemand: number; trend: "up" | "down"; confidence: number; }[];
     seasonalTrends?: { [key: string]: string[] }; // Opcional, dependendo do uso
-  }
-  
-  export interface CustomerSentiment {
+}
+
+export interface CustomerSentiment {
     overallSentiment: number;
     recentTrend: "positive" | "negative" | "neutral";
     topComplaints: string[];
     topPraises: string[];
     recentReviews: string[];
-  }
-  
-  export interface ExpenseAnalysis {
+}
+
+export interface ExpenseAnalysis {
     topExpenses: { category: string; amount: number; trend: "up" | "down"; }[];
     savingsOpportunities?: string[]; // Opcional, dependendo do uso
-  }
-  
-  export interface SalesPerformance {
+}
+
+export interface SalesPerformance {
     topProducts: { name: string; revenue: number; growth: number; date: string }[];
     seasonalPerformance?: { [key: string]: { revenue: number; growth: number } };
-  }
-  
-  export interface Fidelization {
+}
+
+export interface Fidelization {
     topCustomers: { name: string; totalPurchases: number; frequentItems: string[]; suggestedReward: string; }[];
     productPairs?: string[]; // Opcional, dependendo do uso
-  }
+}
 
 export interface InsightData {
     demandPrediction: DemandPrediction | null;

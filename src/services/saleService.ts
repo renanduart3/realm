@@ -60,6 +60,24 @@ export const saleService = {
     }
   },
 
+  async createFullSale(saleData: { items: SaleItem[]; customer: string; totalAmount: number }): Promise<Sale | null> {
+    // Implement the logic for creating a full sale
+    // This could involve inserting the sale into a database, updating inventory, etc.
+    // For now, return a mock Sale object or null
+    const sale: Sale = {
+      id: uuidv4(),
+      customer: saleData.customer,
+      totalAmount: saleData.totalAmount,
+      items: saleData.items,
+      date: new Date().toISOString(),
+    };
+
+    // Example: Insert sale into the database
+    // await db.sales.insert(sale);
+
+    return sale;
+  },
+
   async editProduct(product: ProductService): Promise<ProductService | null> {
     // Existing code...
     return null; // Ensure a return value
