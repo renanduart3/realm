@@ -16,31 +16,13 @@
       "id": "prod-1",
       "name": "Notebook Dell",
       "category": "Eletrônicos",
-      "price": 3499.90,
+      "price": 3499.9,
       "unit": "un",
       "quantity": 15,
       "created_at": "2024-03-15T10:00:00Z",
-      "updated_at": "2024-03-15T10:00:00Z"
-    },
-    {
-      "id": "prod-2",
-      "name": "Monitor LG",
-      "category": "Eletrônicos",
-      "price": 899.90,
-      "unit": "un",
-      "quantity": 30,
-      "created_at": "2024-03-15T10:00:00Z",
-      "updated_at": "2024-03-15T10:00:00Z"
-    },
-    {
-      "id": "prod-3",
-      "name": "Manutenção de PC",
-      "category": "Serviços",
-      "price": 150.00,
-      "unit": "hora",
-      "quantity": 0,
-      "created_at": "2024-03-15T10:00:00Z",
-      "updated_at": "2024-03-15T10:00:00Z"
+      "updated_at": "2024-03-15T10:00:00Z",
+      "type": "Product",
+      "description": "Notebook Dell com 16GB RAM e 512GB SSD"
     }
   ],
   "sales": [
@@ -48,54 +30,45 @@
       "id": "sale-1",
       "date": "2024-03-15",
       "time": "14:30",
-      "value": 3499.90,
+      "value": 3499.9,
       "client_id": "client-1",
       "created_at": "2024-03-15T14:30:00Z",
       "updated_at": "2024-03-15T14:30:00Z"
-    },
-    {
-      "id": "sale-2",
-      "date": "2024-03-15",
-      "time": "15:45",
-      "value": 899.90,
-      "client_id": "client-2",
-      "created_at": "2024-03-15T15:45:00Z",
-      "updated_at": "2024-03-15T15:45:00Z"
-    },
-    {
-      "id": "sale-3",
-      "date": "2024-03-15",
-      "time": "16:20",
-      "value": 150.00,
-      "client_id": "client-3",
-      "created_at": "2024-03-15T16:20:00Z",
-      "updated_at": "2024-03-15T16:20:00Z"
     }
   ],
-  "saleItems": [
+  "income": [
     {
-      "id": "item-1",
-      "sale_id": "sale-1",
-      "product_service_id": "prod-1",
-      "quantity": 1,
-      "created_at": "2024-03-15T14:30:00Z",
-      "updated_at": "2024-03-15T14:30:00Z"
-    },
+      "id": "income-1",
+      "date": "2024-03-15",
+      "value": 5000.0,
+      "description": "Venda de produtos",
+      "amount": 5000.0,
+      "category": "Vendas",
+      "type": "income",
+      "is_recurring": false,
+      "status": "completed",
+      "created_at": "2024-03-15T10:00:00Z",
+      "updated_at": "2024-03-15T10:00:00Z"
+    }
+  ],
+  "donors": [
     {
-      "id": "item-2",
-      "sale_id": "sale-2",
-      "product_service_id": "prod-2",
-      "quantity": 1,
-      "created_at": "2024-03-15T15:45:00Z",
-      "updated_at": "2024-03-15T15:45:00Z"
-    },
+      "id": "donor-1",
+      "name": "Doação Anônima",
+      "amount": 1000.0,
+      "date": "2024-03-15",
+      "type": "individual",
+      "created_at": "2024-03-15T10:00:00Z",
+      "updated_at": "2024-03-15T10:00:00Z"
+    }
+  ],
+  "financialCategories": [
     {
-      "id": "item-3",
-      "sale_id": "sale-3",
-      "product_service_id": "prod-3",
-      "quantity": 1,
-      "created_at": "2024-03-15T16:20:00Z",
-      "updated_at": "2024-03-15T16:20:00Z"
+      "id": "category-1",
+      "name": "Vendas",
+      "type": "income",
+      "created_at": "2024-03-15T10:00:00Z",
+      "updated_at": "2024-03-15T10:00:00Z"
     }
   ],
   "clients": [
@@ -105,24 +78,6 @@
       "email": "joao@email.com",
       "phone": "11999999999",
       "document": "123.456.789-00",
-      "created_at": "2024-03-15T10:00:00Z",
-      "updated_at": "2024-03-15T10:00:00Z"
-    },
-    {
-      "id": "client-2",
-      "name": "Maria Santos",
-      "email": "maria@email.com",
-      "phone": "11988888888",
-      "document": "987.654.321-00",
-      "created_at": "2024-03-15T10:00:00Z",
-      "updated_at": "2024-03-15T10:00:00Z"
-    },
-    {
-      "id": "client-3",
-      "name": "Pedro Oliveira",
-      "email": "pedro@email.com",
-      "phone": "11977777777",
-      "document": "456.789.123-00",
       "created_at": "2024-03-15T10:00:00Z",
       "updated_at": "2024-03-15T10:00:00Z"
     }
@@ -136,24 +91,6 @@
       "nature_type": "profit",
       "created_at": "2024-03-15T10:00:00Z",
       "updated_at": "2024-03-15T10:00:00Z"
-    },
-    {
-      "id": "user-2",
-      "username": "seller1",
-      "password": "seller123",
-      "role": "seller",
-      "nature_type": "profit",
-      "created_at": "2024-03-15T10:00:00Z",
-      "updated_at": "2024-03-15T10:00:00Z"
-    },
-    {
-      "id": "user-3",
-      "username": "seller2",
-      "password": "seller456",
-      "role": "seller",
-      "nature_type": "profit",
-      "created_at": "2024-03-15T10:00:00Z",
-      "updated_at": "2024-03-15T10:00:00Z"
     }
   ],
   "googleSheets": {
@@ -164,23 +101,67 @@
         "tabs": [
           {
             "name": "Transações",
-            "data": [] 
-          },
-          {
-            "name": "Produtos",
-            "data": [] 
-          },
-          {
-            "name": "Pessoas",
-            "data": [] 
-          },
-          {
-            "name": "Análises",
             "data": []
           }
         ]
       }
     ],
     "lastSync": "2024-03-20T00:00:00Z"
+  },
+  "demand": {
+    "topProducts": [
+      {
+        "name": "Product A",
+        "predictedDemand": 100,
+        "trend": "up",
+        "confidence": 0.95
+      }
+    ],
+    "seasonalTrends": {
+      "summer": ["Product A", "Product B"],
+      "winter": ["Product C", "Product D"]
+    }
+  },
+  "sentiment": {
+    "overallSentiment": 0.85,
+    "recentTrend": "positive",
+    "topComplaints": ["Late delivery"],
+    "topPraises": ["Great quality"],
+    "recentReviews": ["Loved it!", "Will buy again!"]
+  },
+  "expense": {
+    "topExpenses": [
+      {
+        "category": "Marketing",
+        "amount": 2000,
+        "trend": "up"
+      }
+    ],
+    "savingsOpportunities": []
+  },
+  "salesPerformance": {
+    "topProducts": [
+      {
+        "name": "Product A",
+        "revenue": 5000,
+        "growth": 10,
+        "date": "2024-03-15"
+      }
+    ],
+    "seasonalPerformance": {
+      "spring": { "revenue": 3000, "growth": 5 },
+      "summer": { "revenue": 7000, "growth": 15 }
+    }
+  },
+  "fidelization": {
+    "topCustomers": [
+      {
+        "name": "Customer A",
+        "totalPurchases": 15000,
+        "frequentItems": ["Product A", "Product B"],
+        "suggestedReward": "10% off next purchase"
+      }
+    ],
+    "productPairs": []
   }
 }

@@ -158,67 +158,32 @@ export interface RecurringExpense extends BaseEntity {
 
 // Interfaces para Insights
 export interface DemandPrediction {
-    topProducts: Array<{
-        name: string;
-        predictedDemand: number;
-        trend: 'up' | 'down';
-        confidence: number;
-    }>;
-    seasonalTrends: {
-        summer: string[];
-        winter: string[];
-    };
-}
-
-export interface CustomerSentiment {
-    overallSentiment?: number;
-    recentTrend: 'positive' | 'negative' | 'neutral';
+    topProducts: { name: string; predictedDemand: number; trend: "up" | "down"; confidence: number; }[];
+    seasonalTrends?: { [key: string]: string[] }; // Opcional, dependendo do uso
+  }
+  
+  export interface CustomerSentiment {
+    overallSentiment: number;
+    recentTrend: "positive" | "negative" | "neutral";
     topComplaints: string[];
     topPraises: string[];
-    recentReviews: Array<{
-        text: string;
-        sentiment: number;
-        date: string;
-    }>;
-}
-
-export interface ExpenseAnalysis {
-    topExpenses: Array<{
-        category: string;
-        amount: number;
-        trend: 'up' | 'down';
-    }>;
-    savingsOpportunities: Array<{
-        category: string;
-        potential: number;
-        suggestion: string;
-    }>;
-}
-
-export interface SalesPerformance {
-    topProducts: Array<{
-        name: string;
-        revenue: number;
-        growth: number;
-    }>;
-    seasonalPerformance: {
-        spring: { revenue: number; growth: number };
-        summer: { revenue: number; growth: number };
-    };
-}
-
-export interface Fidelization {
-    topCustomers: Array<{
-        name: string;
-        totalPurchases: number;
-        frequentItems: string[];
-        suggestedReward: string;
-    }>;
-    productPairs: Array<{
-        products: string[];
-        frequency: number;
-    }>;
-}
+    recentReviews: string[];
+  }
+  
+  export interface ExpenseAnalysis {
+    topExpenses: { category: string; amount: number; trend: "up" | "down"; }[];
+    savingsOpportunities?: string[]; // Opcional, dependendo do uso
+  }
+  
+  export interface SalesPerformance {
+    topProducts: { name: string; revenue: number; growth: number; date: string }[];
+    seasonalPerformance?: { [key: string]: { revenue: number; growth: number } };
+  }
+  
+  export interface Fidelization {
+    topCustomers: { name: string; totalPurchases: number; frequentItems: string[]; suggestedReward: string; }[];
+    productPairs?: string[]; // Opcional, dependendo do uso
+  }
 
 export interface InsightData {
     demandPrediction: DemandPrediction | null;
