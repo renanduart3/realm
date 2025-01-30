@@ -142,8 +142,8 @@ export default function Dashboard() {
       <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Dashboard</h1>
       
       {/* Sales Chart */}
-      <div className="bg-white rounded-lg shadow mt-6 w-full">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="bg-white rounded-lg shadow mt-6 w-full mb-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 ml-2">
             Sales Trend
           </h2>
           <div className="h-80">

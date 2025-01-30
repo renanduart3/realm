@@ -1,4 +1,3 @@
-//src/services/productService.ts
 import { db } from '../db/AppDatabase';
 import { ProductService } from '../model/types';
 import { v4 as uuidv4 } from 'uuid';
@@ -8,8 +7,9 @@ export const productService = {
     name: string, 
     category: string, 
     price: number, 
-    unit: string, 
-    quantity: number
+    quantity: number,
+    type: 'Product' | 'Service', // Added type parameter
+    description: string // Added description parameter
   ): Promise<ProductService | null> {
     try {
       const newProduct: ProductService = {
@@ -17,8 +17,9 @@ export const productService = {
         name,
         category,
         price,
-        unit,
         quantity,
+        type, // Set the type
+        description, // Set the description
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -76,3 +77,6 @@ export const productService = {
     }
   }
 };
+
+// Exporting the productService
+export default productService;
