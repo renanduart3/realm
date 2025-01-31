@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Loader2, CloudCog, Wand2, RotateCcw, CreditCard, Star, Check, X, Brain, Calendar, Cloud, AlertTriangle } from 'lucide-react';
+import { Save, Loader2, CloudCog, Wand2, RotateCcw, CreditCard, Star, Check, X, Brain, Calendar, Cloud, AlertTriangle, Building2, Phone, Globe, Facebook, Instagram, Linkedin, Twitter } from 'lucide-react';
 import { systemConfigService } from '../services/systemConfigService';
 import { googleSheetsService } from '../services/googleSheets.service';
-import { SystemConfig } from '../model/types';
+import { OrganizationSetup } from '../model/types';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../db/AppDatabase';
 import { useNavigate } from 'react-router-dom';
@@ -17,9 +17,9 @@ export default function Settings() {
   const [syncMessage, setSyncMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [isAnnual, setIsAnnual] = useState(false);
-  const [earlyUsersCount] = useState(27); // This would come from your backend
+  const [earlyUsersCount] = useState(27);
   
-  const [config, setConfig] = useState<Partial<SystemConfig>>({});
+  const [config, setConfig] = useState<Partial<OrganizationSetup>>({});
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
 
@@ -72,7 +72,7 @@ export default function Settings() {
     }
   };
 
-  const handleChange = (field: keyof SystemConfig, value: any) => {
+  const handleChange = (field: keyof OrganizationSetup, value: any) => {
     setConfig(prev => ({
       ...prev,
       [field]: value
@@ -112,7 +112,6 @@ export default function Settings() {
   };
 
   const handleSubscribe = (plan: 'free' | 'premium') => {
-    // Handle subscription logic here
     showToast(`Plano ${plan} selecionado`, 'success');
   };
 
@@ -122,6 +121,239 @@ export default function Settings() {
     { id: 'integrations', label: 'Integrações' },
     { id: 'reset', label: 'Resetar Sistema' }
   ];
+
+  const renderOrganizationForm = () => (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Organization Type - Read Only */}
+      <div className="bg-gray-50 dark:bg-gray-700/30 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Tipo de Organização
+        </label>
+        <div className="flex items-center justify-between">
+          <span className="text-gray-900 dark:text-white font-medium">
+            {config.organization_type === 'profit' ? 'Com fins lucrativos' : 'Sem fins lucrativos'}
+          </span>
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            Para alterar, use a opção "Resetar Sistema"
+          </span>
+        </div>
+      </div>
+
+      {/* Basic Information */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Nome da Organização *
+          </label>
+          <input
+            type="text"
+            required
+            value={config.organization_name || ''}
+            onChange={(e) => handleChange('organization_name', e.target.value)}
+            className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            CNPJ
+          </label>
+          <input
+            type="text"
+            value={config.cnpj || ''}
+            onChange={(e) => handleChange('cnpj', e.target.value)}
+            className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            placeholder="00.000.000/0000-00"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Telefone Comercial
+          </label>
+          <input
+            type="tel"
+            value={config.commercial_phone || ''}
+            onChange={(e) => handleChange('commercial_phone', e.target.value)}
+            className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Website
+          </label>
+          <input
+            type="url"
+            value={config.website || ''}
+            onChange={(e) => handleChange('website', e.target.value)}
+            className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            placeholder="https://..."
+          />
+        </div>
+      </div>
+
+      {/* Address */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Endereço
+        </label>
+        <input
+          type="text"
+          value={config.address || ''}
+          onChange={(e) => handleChange('address', e.target.value)}
+          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+        />
+      </div>
+
+      {/* Social Media */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Redes Sociais</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex items-center space-x-2">
+            <Facebook className="w-5 h-5 text-blue-600" />
+            <input
+              type="url"
+              value={config.social_media?.facebook || ''}
+              onChange={(e) => handleChange('social_media', { ...config.social_media, facebook: e.target.value })}
+              className="flex-1 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              placeholder="Facebook URL"
+            />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Instagram className="w-5 h-5 text-pink-600" />
+            <input
+              type="url"
+              value={config.social_media?.instagram || ''}
+              onChange={(e) => handleChange('social_media', { ...config.social_media, instagram: e.target.value })}
+              className="flex-1 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              placeholder="Instagram URL"
+            />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Linkedin className="w-5 h-5 text-blue-700" />
+            <input
+              type="url"
+              value={config.social_media?.linkedin || ''}
+              onChange={(e) => handleChange('social_media', { ...config.social_media, linkedin: e.target.value })}
+              className="flex-1 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              placeholder="LinkedIn URL"
+            />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Twitter className="w-5 h-5 text-blue-400" />
+            <input
+              type="url"
+              value={config.social_media?.twitter || ''}
+              onChange={(e) => handleChange('social_media', { ...config.social_media, twitter: e.target.value })}
+              className="flex-1 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              placeholder="Twitter URL"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* PIX Configuration */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Configuração do PIX</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Tipo de Chave PIX
+            </label>
+            <select
+              value={config.pix_key?.type || ''}
+              onChange={(e) => handleChange('pix_key', { 
+                ...config.pix_key,
+                type: e.target.value as 'cnpj' | 'email' | 'phone' | 'random'
+              })}
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">Selecione...</option>
+              <option value="cnpj">CNPJ</option>
+              <option value="email">E-mail</option>
+              <option value="phone">Telefone</option>
+              <option value="random">Chave Aleatória</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Chave PIX
+            </label>
+            <input
+              type="text"
+              value={config.pix_key?.key || ''}
+              onChange={(e) => handleChange('pix_key', { 
+                ...config.pix_key,
+                key: e.target.value
+              })}
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* System Settings */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Configurações do Sistema</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Moeda
+            </label>
+            <select
+              value={config.currency || 'BRL'}
+              onChange={(e) => handleChange('currency', e.target.value)}
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="BRL">BRL (R$)</option>
+              <option value="USD">USD ($)</option>
+              <option value="EUR">EUR (€)</option>
+            </select>
+          </div>
+
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="require_auth"
+              checked={config.require_auth || false}
+              onChange={(e) => handleChange('require_auth', e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="require_auth" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+              Exigir autenticação
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          disabled={loading}
+          className={`flex items-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+            loading ? 'opacity-75 cursor-not-allowed' : ''
+          }`}
+        >
+          {loading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Salvando...
+            </>
+          ) : (
+            <>
+              <Save className="w-4 h-4 mr-2" />
+              Salvar Configurações
+            </>
+          )}
+        </button>
+      </div>
+    </form>
+  );
 
   return (
     <div className="p-6">
@@ -156,95 +388,7 @@ export default function Settings() {
             <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
               Configurações da Organização
             </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Tipo de Organização
-                </label>
-                <select
-                  value={config.organization_type || 'profit'}
-                  onChange={(e) => {
-                    handleChange('organization_type', e.target.value as 'profit' | 'nonprofit');
-                    updateOrganizationType(e.target.value as 'profit' | 'nonprofit');
-                  }}
-                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                >
-                  <option value="profit">Com fins lucrativos</option>
-                  <option value="nonprofit">Sem fins lucrativos</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Nome da Organização
-                </label>
-                <input
-                  type="text"
-                  value={config.organization_name || ''}
-                  onChange={(e) => handleChange('organization_name', e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Moeda
-                </label>
-                <select
-                  value={config.currency || 'BRL'}
-                  onChange={(e) => handleChange('currency', e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                >
-                  <option value="BRL">BRL (R$)</option>
-                  <option value="USD">USD ($)</option>
-                  <option value="EUR">EUR (€)</option>
-                </select>
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="require_auth"
-                  checked={config.require_auth || false}
-                  onChange={(e) => handleChange('require_auth', e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="require_auth" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                  Exigir autenticação
-                </label>
-              </div>
-
-              {appConfig.isDevelopment && !config.is_configured && (
-                <button
-                  type="button"
-                  onClick={() => navigate('/setup')}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
-                >
-                  <Wand2 className="w-4 h-4 mr-2" />
-                  Executar Wizard de Configuração
-                </button>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className={`ml-auto flex right items-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-                  loading ? 'opacity-75 cursor-not-allowed' : ''
-                }`}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Salvando...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4 mr-2" />
-                    Salvar Configurações
-                  </>
-                )}
-              </button>
-            </form>
+            {renderOrganizationForm()}
           </div>
         )}
 

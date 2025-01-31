@@ -6,11 +6,9 @@ import {
   ShoppingBag, 
   Users, 
   Settings, 
-  ChevronLeft,
-  ChevronRight,
+  X,
   Receipt,
-  Boxes,
-  X
+  Boxes
 } from 'lucide-react';
 import { systemConfigService } from '../services/systemConfigService';
 import { SystemConfig } from '../model/types';
@@ -21,7 +19,6 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [config, setConfig] = useState<SystemConfig | null>(null);
   const location = useLocation();
 
@@ -45,7 +42,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     { 
       path: '/products', 
       icon: <ShoppingBag size={20} />, 
-      label: 'Produtos/Serviços',
+      label: 'Produtos',
       show: config?.organization_type === 'profit'
     },
     { 
@@ -54,7 +51,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       label: config?.organization_type === 'profit' ? 'Clientes' : 'Pessoas'
     },
     { path: '/settings', icon: <Settings size={20} />, label: 'Configurações' },
-    { path: '/componentes', icon: <Boxes size={20} />, label: 'Teste Componentes' },
+    { path: '/componentes', icon: <Boxes size={20} />, label: 'Componentes' },
   ];
 
   // Mobile overlay
@@ -73,7 +70,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       <aside
         className={`fixed top-16 left-0 h-[calc(100vh-4rem)] transition-all duration-300 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-30
           ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-          ${isCollapsed ? 'w-20' : 'w-64'}
+          w-64 md:w-20
         `}
       >
         {/* Mobile close button */}
@@ -84,18 +81,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <X size={20} />
         </button>
 
-        {/* Desktop collapse button */}
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="absolute -right-3 top-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-700 hidden md:block"
-        >
-          {isCollapsed ? (
-            <ChevronRight size={16} className="text-gray-600 dark:text-gray-300" />
-          ) : (
-            <ChevronLeft size={16} className="text-gray-600 dark:text-gray-300" />
-          )}
-        </button>
-
         <nav className="mt-6">
           {menuItems
             .filter(item => item.show !== false)
@@ -104,19 +89,20 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 key={item.path}
                 to={item.path}
                 onClick={() => {
-                  // Close sidebar on mobile when clicking a link
                   if (window.innerWidth < 768) {
                     onClose();
                   }
                 }}
-                className={`flex items-center px-6 py-3 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                className={`flex flex-col items-center px-2 py-3 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 ${
                   location.pathname === item.path
                     ? 'text-blue-600 dark:text-blue-500 bg-blue-50 dark:bg-blue-900/20'
                     : ''
                 }`}
               >
                 {item.icon}
-                {!isCollapsed && <span className="ml-3">{item.label}</span>}
+                <span className={`mt-1 text-xs md:block ${!isOpen && 'hidden'}`}>
+                  {item.label}
+                </span>
               </Link>
             ))}
         </nav>

@@ -7,6 +7,7 @@ import NotificationItem from './NotificationItem';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
+import logo from '../assets/img/logo.png';
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -24,13 +25,11 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
 
   useEffect(() => {
     loadNotifications();
-    // Set up interval to check for new notifications every minute
     const interval = setInterval(loadNotifications, 60000);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    // Handle clicks outside dropdowns
     function handleClickOutside(event: MouseEvent) {
       if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
         setIsNotificationsOpen(false);
@@ -82,6 +81,17 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
           >
             <Menu size={24} />
           </button>
+        </div>
+
+        {/* Center - Logo */}
+        <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
+          <div className="text-xl font-bold text-gray-900 dark:text-white">
+          <img 
+                            src={logo} 
+                            alt="Logo" 
+                            className="h-10 w-auto object-contain"
+                        />
+          </div>
         </div>
 
         {/* Right side */}

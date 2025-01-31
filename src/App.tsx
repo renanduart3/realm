@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
@@ -16,13 +16,32 @@ import FullSale from './pages/FullSale';
 import Login from './pages/Login';
 import Income from './pages/Income';
 import SetupWizard from './pages/SetupWizard';
+import Preloader from './components/Preloader';
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
-    // Initialize mock data when the app starts
-    mockDataService.initializeMockData()
-      .catch(error => console.error('Failed to initialize mock data:', error));
+    const initializeApp = async () => {
+      try {
+        // Initialize mock data when the app starts
+        await mockDataService.initializeMockData();
+        
+        // Simulate minimum loading time for better UX
+        await new Promise(resolve => setTimeout(resolve, 1500));
+      } catch (error) {
+        console.error('Failed to initialize mock data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeApp();
   }, []);
+
+  if (isLoading) {
+    return <Preloader />;
+  }
 
   return (
     <Router>

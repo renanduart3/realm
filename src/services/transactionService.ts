@@ -2,6 +2,8 @@ import { db } from '../db/AppDatabase';
 import { Transaction, ExpenseCategory } from '../model/types';
 import { v4 as uuidv4 } from 'uuid';
 
+type TransactionStatus = 'pending' | 'paid' | 'cancelled';
+
 export const transactionService = {
   async createTransaction(
     category: ExpenseCategory,
@@ -107,10 +109,51 @@ export const transactionService = {
       const startDate = new Date(year, month - 1, 1).toISOString().split('T')[0];
       const endDate = new Date(year, month, 0).toISOString().split('T')[0];
 
-      const transactions = await db.transactions
-        .where('date')
-        .between(startDate, endDate, true, true)
-        .toArray();
+      // Get all transactions
+      const allTransactions = await db.transactions.toArray();
+      
+      // Filter transactions for the specified month
+      const transactions = allTransactions.filter(transaction => {
+        const transactionDate = new Date(transaction.date);
+        
+        // Regular transactions for this month
+        if (transactionDate >= new Date(startDate) && transactionDate <= new Date(endDate)) {
+          return true;
+        }
+        
+        // Recurring transactions from previous months
+        if (transaction.is_recurring) {
+          const originalDate = new Date(transaction.date);
+          const currentDate = new Date(year, month - 1, originalDate.getDate());
+          
+          // Only include if the original transaction was created before or during this month
+          return originalDate <= currentDate;
+        }
+        
+        return false;
+      }).map(transaction => {
+        // If it's a recurring transaction from a previous month,
+        // create a new instance for this month
+        if (transaction.is_recurring) {
+          const originalDate = new Date(transaction.date);
+          const newDate = new Date(year, month - 1, originalDate.getDate());
+          
+          // Only modify if it's from a previous month
+          if (newDate > new Date(transaction.date)) {
+            const newTransaction: Transaction = {
+              ...transaction,
+              id: uuidv4(), // New ID for the recurring instance
+              date: newDate.toISOString().split('T')[0],
+              status: 'pending' as TransactionStatus, // Explicitly type the status
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            };
+            return newTransaction;
+          }
+        }
+        
+        return transaction;
+      });
 
       return transactions;
     } catch (error) {
@@ -147,7 +190,7 @@ export const transactionService = {
     }
   },
 
-  async updateTransactionStatus(id: string, status: 'pending' | 'paid' | 'cancelled'): Promise<boolean> {
+  async updateTransactionStatus(id: string, status: TransactionStatus): Promise<boolean> {
     try {
       const transaction = await this.getTransactionById(id);
       if (!transaction) {
