@@ -49,7 +49,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       show: config?.organization_type === 'profit'
     },
     { 
-      path: '/people', 
+      path: '/persons', 
       icon: <Users size={20} />, 
       label: config?.organization_type === 'profit' ? 'Clientes' : 'Pessoas'
     },
