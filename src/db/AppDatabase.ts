@@ -3,7 +3,6 @@ import {
   ProductService, 
   Sale, 
   SaleItem, 
-  FinancialCategory, 
   Transaction, 
   SystemUser, 
   InvitationCode,
@@ -14,7 +13,8 @@ import {
   Donor,
   Expense,
   BaseEntity,
-  SubscriptionStatus
+  SubscriptionStatus,
+  ExpenseCategory
 } from '../model/types';
 
 export interface Insight extends BaseEntity {
@@ -52,13 +52,12 @@ interface SyncData {
 }
 
 export class AppDatabase extends Dexie {
-  // Tabelas principais
+  // Main tables
   systemConfig!: Table<SystemConfig>;
   products!: Table<ProductService>;
   income!: Table<Income>;
   donors!: Table<Donor>;
   persons!: Table<Person>;
-  financialCategories!: Table<FinancialCategory>;
   systemUsers!: Table<SystemUser>;
   sales!: Table<Sale>;
   saleItems!: Table<SaleItem>;
@@ -68,7 +67,7 @@ export class AppDatabase extends Dexie {
   transactions!: Table<Transaction>;
   subscriptionStatus!: Table<SubscriptionStatus>;
 
-  // Tabelas de sincronização
+  // Sync tables
   syncMetadata!: Table<SyncMetadata>;
   syncSales!: Table<SyncData>;
   syncIncome!: Table<SyncData>;
@@ -78,31 +77,39 @@ export class AppDatabase extends Dexie {
   constructor() {
     super('AppDatabase');
     
-    this.version(1).stores({
-      // Tabelas principais
+    this.version(2).stores({
+      // Main tables
       systemConfig: 'id',
       products: '++id',
       income: '++id',
       donors: '++id',
       persons: '++id',
-      financialCategories: '++id',
       systemUsers: '++id',
       sales: '++id',
       saleItems: '++id, sale_id, product_service_id',
       expenses: '++id',
       insights: '++id, type, year, timestamp, [year+type]',
       clients: '++id',
-      transactions: '++id, type, year',
+      transactions: '++id, category, date, [date+category]',
       subscriptionStatus: 'id',
 
-      // Tabelas de sincronização
+      // Sync tables
       syncMetadata: 'id, year, sheetId, lastSync',
       syncSales: '++id, year, date, [year+date]',
       syncIncome: '++id, year, date, [year+date]',
       syncExpenses: '++id, year, date, [year+date]',
       syncInsights: '++id, year, type, timestamp, [year+type]'
+    }).upgrade(tx => {
+      // Migrate existing transactions to use the new category enum
+      return tx.transactions.toCollection().modify(transaction => {
+        if (transaction.financial_category_id) {
+          // Convert old financial_category_id to new category enum
+          transaction.category = 'others';
+          delete transaction.financial_category_id;
+        }
+      });
     });
   }
 }
 
-export const db = new AppDatabase(); 
+export const db = new AppDatabase();

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { QrCode, Clock, CheckCircle, AlertTriangle, Copy, RefreshCw, Star, CreditCard, Brain, Cloud } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
-import { PaymentModal } from '../components/PaymentModal';
+import  PaymentModal  from '../components/PaymentModal';
 
 interface Subscription {
   id: string;

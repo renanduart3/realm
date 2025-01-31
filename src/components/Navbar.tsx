@@ -1,144 +1,132 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-    Bell,
-    Sun,
-    Moon,
-    User,
-    LogOut,
-    CreditCard,
-    Settings as SettingsIcon,
-    ChevronDown
-} from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState, useEffect, useRef } from 'react';
+import { Menu, Bell } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import logo from '../assets/img/logo.png';
+import { Transaction } from '../model/types';
+import { transactionService } from '../services/transactionService';
+import NotificationItem from './NotificationItem';
+import { useToast } from '../hooks/useToast';
 
-export default function Navbar() {
-    const [showUserMenu, setShowUserMenu] = useState(false);
-    const [showNotifications, setShowNotifications] = useState(false);
-    const { logout, user } = useAuth();
-    const { theme, toggleTheme } = useTheme();
-    const navigate = useNavigate();
+interface NavbarProps {
+  onMenuClick: () => void;
+}
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
-    };
+const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
+  const { theme, toggleTheme } = useTheme();
+  const [notifications, setNotifications] = useState<Transaction[]>([]);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const notificationsRef = useRef<HTMLDivElement>(null);
+  const { showToast } = useToast();
 
-    return (
-        <nav className="fixed top-0 left-0 right-0 h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-50">
-            <div className="h-full px-4 flex items-center justify-between">
-                <div className="flex items-center">
-                    <div className="flex items-center space-x-2">
-                        <img 
-                            src={logo} 
-                            alt="Logo" 
-                            className="h-10 w-auto object-contain"
-                        />
-                        <span className="text-xl font-semibold text-gray-800 dark:text-white hidden sm:inline">
-                            {/* Nome da organização aqui se necessário */}
-                        </span>
-                    </div>
+  useEffect(() => {
+    loadNotifications();
+    // Set up interval to check for new notifications every minute
+    const interval = setInterval(loadNotifications, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    // Handle clicks outside notifications dropdown
+    function handleClickOutside(event: MouseEvent) {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setIsNotificationsOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const loadNotifications = async () => {
+    const upcomingTransactions = await transactionService.getTransactionsForNotification();
+    setNotifications(upcomingTransactions);
+  };
+
+  const handleDismissNotification = async (transactionId: string) => {
+    try {
+      const success = await transactionService.dismissNotification(transactionId);
+      if (success) {
+        setNotifications(prev => prev.filter(n => n.id !== transactionId));
+        showToast('Notification dismissed', 'success');
+      } else {
+        throw new Error('Failed to dismiss notification');
+      }
+    } catch (error) {
+      showToast(
+        error instanceof Error ? error.message : 'Failed to dismiss notification',
+        'error'
+      );
+    }
+  };
+
+  return (
+    <nav className="fixed top-0 left-0 right-0 h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-50">
+      <div className="h-full px-4 flex items-center justify-between">
+        {/* Left side */}
+        <div className="flex items-center">
+          <button
+            onClick={onMenuClick}
+            className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            <Menu size={24} />
+          </button>
+        </div>
+
+        {/* Right side */}
+        <div className="flex items-center space-x-4">
+          {/* Notifications */}
+          <div className="relative" ref={notificationsRef}>
+            <button
+              onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+              className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 relative"
+            >
+              <Bell size={24} />
+              {notifications.length > 0 && (
+                <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                  {notifications.length}
+                </span>
+              )}
+            </button>
+
+            {/* Notifications dropdown */}
+            {isNotificationsOpen && (
+              <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Notifications
+                  </h3>
                 </div>
 
-                <div className="flex items-center space-x-4">
-                    {/* Notificações */}
-                    <div className="relative">
-                        <button
-                            onClick={() => setShowNotifications(!showNotifications)}
-                            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-                        >
-                            <Bell className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                        </button>
-
-                        {showNotifications && (
-                            <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-                                <div className="p-4">
-                                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
-                                        Notificações
-                                    </h3>
-                                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                                        Nenhuma notificação no momento
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                <div className="max-h-96 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                      No notifications
                     </div>
-
-                    {/* Toggle Tema */}
-                    <button
-                        onClick={toggleTheme}
-                        className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                        {theme === 'dark' ? (
-                            <Sun className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                        ) : (
-                            <Moon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                        )}
-                    </button>
-
-                    {/* Menu Usuário */}
-                    <div className="relative">
-                        <button
-                            onClick={() => setShowUserMenu(!showUserMenu)}
-                            className="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-                        >
-                            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
-                                <User className="w-5 h-5 text-white" />
-                            </div>
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {user?.username}
-                            </span>
-                            <ChevronDown className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-                        </button>
-
-                        {showUserMenu && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-                                <div className="py-1">
-                                    <button
-                                        onClick={() => {
-                                            setShowUserMenu(false);
-                                            navigate('/profile');
-                                        }}
-                                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
-                                    >
-                                        <User className="w-4 h-4 mr-2" />
-                                        Perfil
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setShowUserMenu(false);
-                                            navigate('/subscription');
-                                        }}
-                                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
-                                    >
-                                        <CreditCard size={16} />
-                                        Subscription
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setShowUserMenu(false);
-                                            navigate('/settings');
-                                        }}
-                                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
-                                    >
-                                        <SettingsIcon className="w-4 h-4 mr-2" />
-                                        Configurações
-                                    </button>
-                                    <button
-                                        onClick={handleLogout}
-                                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
-                                    >
-                                        <LogOut className="w-4 h-4 mr-2" />
-                                        Sair
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                  ) : (
+                    notifications.map(notification => (
+                      <NotificationItem
+                        key={notification.id}
+                        transaction={notification}
+                        debtorName={notification.description || 'Unnamed Transaction'}
+                        onDismiss={handleDismissNotification}
+                      />
+                    ))
+                  )}
                 </div>
-            </div>
-        </nav>
-    );
-} 
+              </div>
+            )}
+          </div>
+
+          {/* Theme toggle */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            {theme === 'dark' ? '🌞' : '🌙'}
+          </button>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;

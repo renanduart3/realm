@@ -19,7 +19,7 @@ const Breadcrumb = () => {
     ];
 
     let currentPath = '';
-    paths.forEach(path => {
+    paths.forEach((path, index) => {
       currentPath += `/${path}`;
       let label = path.charAt(0).toUpperCase() + path.slice(1);
       
@@ -27,6 +27,11 @@ const Breadcrumb = () => {
       switch (path) {
         case 'sales':
           label = organizationType === 'profit' ? 'Vendas' : 'Entradas';
+          break;
+        case 'full':
+          if (paths[index - 1] === 'sales') {
+            label = 'Venda Completa';
+          }
           break;
         case 'people':
         case 'clients':
@@ -77,4 +82,4 @@ const Breadcrumb = () => {
   );
 };
 
-export default Breadcrumb; 
+export default Breadcrumb;

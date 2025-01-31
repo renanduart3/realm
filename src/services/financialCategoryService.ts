@@ -1,71 +1,27 @@
-import { db } from '../db/AppDatabase';
-import { FinancialCategory } from '../model/types';
-import { v4 as uuidv4 } from 'uuid';
+import { ExpenseCategory } from '../model/types';
+
+export const EXPENSE_CATEGORIES: ExpenseCategory[] = ['services', 'consume', 'others'];
 
 export const financialCategoryService = {
-  async createFinancialCategory(
-    name: string,
-    type: 'income' | 'expense'
-  ): Promise<FinancialCategory | null> {
-    try {
-      const newCategory: FinancialCategory = {
-        id: uuidv4(),
-        name,
-        type,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-
-      await db.financialCategories.add(newCategory);
-      return newCategory;
-    } catch (error) {
-      console.error("FinancialCategoryService - Error creating new category", error);
-      return null;
-    }
+  getExpenseCategories(): ExpenseCategory[] {
+    return EXPENSE_CATEGORIES;
   },
 
-  async getFinancialCategoryById(id: string): Promise<FinancialCategory | null> {
-    try {
-      const category = await db.financialCategories.get(id);
-      return category || null;
-    } catch (error) {
-      console.error("FinancialCategoryService - Error getting category", error);
-      return null;
-    }
+  getCategoryLabel(category: ExpenseCategory): string {
+    const labels: Record<ExpenseCategory, string> = {
+      services: 'Services',
+      consume: 'Consume',
+      others: 'Others'
+    };
+    return labels[category];
   },
 
-  async getAllFinancialCategories(): Promise<FinancialCategory[]> {
-    try {
-      const categories = await db.financialCategories.toArray();
-      return categories;
-    } catch (error) {
-      console.error("FinancialCategoryService - Error getting all categories", error);
-      return [];
-    }
-  },
-
-  async editFinancialCategory(category: FinancialCategory): Promise<FinancialCategory | null> {
-    try {
-      const updatedCategory = {
-        ...category,
-        updated_at: new Date().toISOString()
-      };
-      
-      await db.financialCategories.put(updatedCategory);
-      return updatedCategory;
-    } catch (error) {
-      console.error("FinancialCategoryService - Error editing category", error);
-      return null;
-    }
-  },
-
-  async deleteFinancialCategory(id: string): Promise<boolean> {
-    try {
-      await db.financialCategories.delete(id);
-      return true;
-    } catch (error) {
-      console.error("FinancialCategoryService - Error deleting category", error);
-      return false;
-    }
+  getCategoryColor(category: ExpenseCategory): string {
+    const colors: Record<ExpenseCategory, string> = {
+      services: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
+      consume: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
+      others: 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
+    };
+    return colors[category];
   }
 };

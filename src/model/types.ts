@@ -1,9 +1,10 @@
-//types.ts
 export interface BaseEntity {
     id: string;
     created_at: string;
     updated_at: string;
 }
+
+export type ExpenseCategory = 'services' | 'consume' | 'others';
 
 export interface SystemConfig extends BaseEntity {
     organization_type: 'profit' | 'nonprofit';
@@ -34,58 +35,21 @@ export interface Sale extends BaseEntity {
     client_id?: string;
     person_id?: string;
 }
-export interface Expense extends BaseEntity {
-    description: string;
-    amount: number;
-    category_id: string;
-    date: string;
-    is_recurring: boolean;
-    due_date?: number;
-    status: 'pending' | 'paid' | 'cancelled';
-    payment_method?: string;
-    notes?: string;
-}
-export type PaymentProvider = 'mercadopago' | 'pagarme';
-
-export interface PaymentConfig {
-    provider: PaymentProvider;
-    apiKey: string;
-    environment: 'development' | 'production';
-}
-
-export interface SubscriptionStatus extends BaseEntity {
-    active: boolean;
-    plan: 'free' | 'premium';
-    billing: 'monthly' | 'yearly';
-    currentPeriodEnd: string;
-    cancelAtPeriodEnd: boolean;
-    lastSync: string;
-}
-
-export interface PaymentError {
-    code: string;
-    message: string;
-    timestamp: string;
-}
-export interface SaleItem extends BaseEntity {
-    product: string;
-    quantity: number;
-    sale_id: string;
-    product_service_id: string;
-}
-
-
-
-export interface FinancialCategory extends BaseEntity {
-    name: string;
-    type: 'income' | 'expense';
-}
 
 export interface Transaction extends BaseEntity {
-    financial_category_id: string;
+    category: ExpenseCategory;
     value: number;
     date: string;
     time: string;
+    client_id?: string;
+    person_id?: string;
+    related_transaction_id?: string;
+    interest_amount?: number;
+    is_recurring?: boolean;
+    description?: string;
+    status: 'pending' | 'paid' | 'cancelled';
+    due_date?: string;
+    notification_dismissed?: boolean;
 }
 
 export interface SystemUser extends BaseEntity {
@@ -155,14 +119,14 @@ export interface RecurringExpense extends BaseEntity {
     description: string;
     amount: number;
     due_date: number;
-    category_id: string;
+    category: ExpenseCategory;
     is_recurring: boolean;
 }
 
 // Interfaces para Insights
 export interface DemandPrediction {
     topProducts: { name: string; predictedDemand: number; trend: "up" | "down"; confidence: number; }[];
-    seasonalTrends?: { [key: string]: string[] }; // Opcional, dependendo do uso
+    seasonalTrends?: { [key: string]: string[] };
 }
 
 export interface CustomerSentiment {
@@ -175,7 +139,7 @@ export interface CustomerSentiment {
 
 export interface ExpenseAnalysis {
     topExpenses: { category: string; amount: number; trend: "up" | "down"; }[];
-    savingsOpportunities?: string[]; // Opcional, dependendo do uso
+    savingsOpportunities?: string[];
 }
 
 export interface SalesPerformance {
@@ -185,7 +149,7 @@ export interface SalesPerformance {
 
 export interface Fidelization {
     topCustomers: { name: string; totalPurchases: number; frequentItems: string[]; suggestedReward: string; }[];
-    productPairs?: string[]; // Opcional, dependendo do uso
+    productPairs?: string[];
 }
 
 export interface InsightData {

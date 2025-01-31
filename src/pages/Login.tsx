@@ -46,6 +46,16 @@ export default function Login() {
         }));
     };
 
+    const handleForgotPassword = (e: React.MouseEvent) => {
+        e.preventDefault();
+        // Implement forgot password functionality
+    };
+
+    const handleCreateAccount = (e: React.MouseEvent) => {
+        e.preventDefault();
+        // Implement create account functionality
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-800 flex items-center justify-center p-4">
             <div className="max-w-md w-full bg-white dark:bg-gray-900 rounded-lg shadow-lg p-8">
@@ -54,10 +64,13 @@ export default function Login() {
                         <form onSubmit={handleSubmit} className="flex flex-col w-full h-full pb-6 text-center bg-white rounded-3xl">
                             <h3 className="mb-3 text-4xl font-extrabold text-dark-grey-900">Entrar</h3>
                             <p className="mb-4 text-grey-700">Digite seu email e senha</p>
-                            <a className="flex items-center justify-center w-full py-4 mb-6 text-sm font-medium transition duration-300 rounded-2xl text-grey-900 bg-grey-300 hover:bg-grey-400 focus:ring-4 focus:ring-grey-300">
+                            <button 
+                                type="button"
+                                className="flex items-center justify-center w-full py-4 mb-6 text-sm font-medium transition duration-300 rounded-2xl text-grey-900 bg-grey-300 hover:bg-grey-400 focus:ring-4 focus:ring-grey-300"
+                            >
                                 <img className="h-5 mr-2" src="https://raw.githubusercontent.com/Loopple/loopple-public-assets/main/motion-tailwind/img/logos/logo-google.png" alt="" />
                                 <span>Sign in with Google</span>
-                            </a>
+                            </button>
                             <div className="flex items-center mb-3">
                                 <hr className="h-0 border-b border-solid border-grey-500 grow" />
                                 <p className="mx-4 text-grey-600">or</p>
@@ -71,6 +84,7 @@ export default function Login() {
                                 onChange={handleInputChange}
                                 placeholder="seu@email.com" 
                                 className="flex items-center w-full px-5 py-4 mr-2 text-sm font-medium outline-none focus:bg-grey-400 mb-7 placeholder:text-grey-700 bg-grey-200 text-dark-grey-900 rounded-2xl" 
+                                autoComplete="email"
                             />
                             <label className="mb-2 text-sm text-start text-grey-900">Password*</label>
                             <input 
@@ -80,6 +94,7 @@ export default function Login() {
                                 onChange={handleInputChange}
                                 placeholder="Digite sua senha" 
                                 className="flex items-center w-full px-5 py-4 mb-5 mr-2 text-sm font-medium outline-none focus:bg-grey-400 placeholder:text-grey-700 bg-grey-200 text-dark-grey-900 rounded-2xl" 
+                                autoComplete="current-password"
                             />
                             <div className="flex flex-row justify-between mb-8">
                                 <div className="flex items-center">
@@ -95,7 +110,12 @@ export default function Login() {
                                         Lembrar-me
                                     </label>
                                 </div>
-                                <a href="javascript:void(0)" className="mr-4 text-sm font-medium text-purple-blue-500">Forget password?</a>
+                                <button
+                                    onClick={handleForgotPassword}
+                                    className="mr-4 text-sm font-medium text-purple-blue-500"
+                                >
+                                    Forget password?
+                                </button>
                             </div>
                             <button 
                                 type="submit"
@@ -103,7 +123,15 @@ export default function Login() {
                             >
                                 Entrar
                             </button>
-                            <p className="text-sm leading-relaxed text-grey-900">Not registered yet? <a href="javascript:void(0)" className="font-bold text-grey-700">Create an Account</a></p>
+                            <p className="text-sm leading-relaxed text-grey-900">
+                                Not registered yet?{' '}
+                                <button
+                                    onClick={handleCreateAccount}
+                                    className="font-bold text-grey-700"
+                                >
+                                    Create an Account
+                                </button>
+                            </p>
                         </form>
                     </div>
                 </div>

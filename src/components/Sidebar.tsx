@@ -9,12 +9,18 @@ import {
   ChevronLeft,
   ChevronRight,
   Receipt,
-  Boxes
+  Boxes,
+  X
 } from 'lucide-react';
 import { systemConfigService } from '../services/systemConfigService';
 import { SystemConfig } from '../model/types';
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [config, setConfig] = useState<SystemConfig | null>(null);
   const location = useLocation();
@@ -51,41 +57,70 @@ export default function Sidebar() {
     { path: '/componentes', icon: <Boxes size={20} />, label: 'Teste Componentes' },
   ];
 
-  return (
-    <aside
-      className={`fixed top-16 left-0 h-[calc(100vh-4rem)] transition-all duration-300 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 ${
-        isCollapsed ? 'w-20' : 'w-64'
-      }`}
-    >
-      <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-3 top-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
-      >
-        {isCollapsed ? (
-          <ChevronRight size={16} className="text-gray-600 dark:text-gray-300" />
-        ) : (
-          <ChevronLeft size={16} className="text-gray-600 dark:text-gray-300" />
-        )}
-      </button>
+  // Mobile overlay
+  const overlay = (
+    <div 
+      className={`fixed inset-0 bg-black bg-opacity-50 transition-opacity md:hidden z-20
+        ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+      `}
+      onClick={onClose}
+    />
+  );
 
-      <nav className="mt-6">
-        {menuItems
-          .filter(item => item.show !== false)
-          .map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center px-6 py-3 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                location.pathname === item.path
-                  ? 'text-blue-600 dark:text-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                  : ''
-              }`}
-            >
-              {item.icon}
-              {!isCollapsed && <span className="ml-3">{item.label}</span>}
-            </Link>
-          ))}
-      </nav>
-    </aside>
+  return (
+    <>
+      {overlay}
+      <aside
+        className={`fixed top-16 left-0 h-[calc(100vh-4rem)] transition-all duration-300 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-30
+          ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          ${isCollapsed ? 'w-20' : 'w-64'}
+        `}
+      >
+        {/* Mobile close button */}
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 md:hidden"
+        >
+          <X size={20} />
+        </button>
+
+        {/* Desktop collapse button */}
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="absolute -right-3 top-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-700 hidden md:block"
+        >
+          {isCollapsed ? (
+            <ChevronRight size={16} className="text-gray-600 dark:text-gray-300" />
+          ) : (
+            <ChevronLeft size={16} className="text-gray-600 dark:text-gray-300" />
+          )}
+        </button>
+
+        <nav className="mt-6">
+          {menuItems
+            .filter(item => item.show !== false)
+            .map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => {
+                  // Close sidebar on mobile when clicking a link
+                  if (window.innerWidth < 768) {
+                    onClose();
+                  }
+                }}
+                className={`flex items-center px-6 py-3 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                  location.pathname === item.path
+                    ? 'text-blue-600 dark:text-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                    : ''
+                }`}
+              >
+                {item.icon}
+                {!isCollapsed && <span className="ml-3">{item.label}</span>}
+              </Link>
+            ))}
+        </nav>
+      </aside>
+    </>
   );
 }
