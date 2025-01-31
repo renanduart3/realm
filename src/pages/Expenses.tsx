@@ -11,10 +11,10 @@ export default function Expenses() {
   const [formData, setFormData] = useState({
     description: '',
     amount: '',
-    date: new Date().toISOString().split('T')[0],
+    due_date: new Date().toISOString().split('T')[0],
     category: 'others' as ExpenseCategory,
     is_recurring: false,
-    due_date: new Date().toISOString().split('T')[0]
+    status: 'pending' as 'pending' | 'paid'
   });
 
   const [recentExpenses, setRecentExpenses] = useState<Transaction[]>([]);
@@ -47,10 +47,10 @@ export default function Expenses() {
     setFormData({
       description: '',
       amount: '',
-      date: new Date().toISOString().split('T')[0],
+      due_date: new Date().toISOString().split('T')[0],
       category: 'others',
       is_recurring: false,
-      due_date: new Date().toISOString().split('T')[0]
+      status: 'pending'
     });
   };
 
@@ -59,7 +59,7 @@ export default function Expenses() {
     setIsSubmitting(true);
 
     try {
-      if (!formData.amount || !formData.category || !formData.date) {
+      if (!formData.amount || !formData.category || !formData.due_date) {
         throw new Error('Please fill in all required fields');
       }
 
@@ -68,20 +68,26 @@ export default function Expenses() {
         throw new Error('Please enter a valid amount');
       }
 
+      // Create the transaction
       const result = await transactionService.createTransaction(
         formData.category,
         amount,
-        formData.date,
+        formData.due_date,
         new Date().toTimeString().split(' ')[0],
         formData.description,
         undefined,
         undefined,
         formData.is_recurring,
-        formData.is_recurring ? formData.due_date : undefined
+        formData.due_date
       );
 
       if (!result) {
         throw new Error('Failed to create expense');
+      }
+
+      // If the expense is marked as paid, update its status
+      if (formData.status === 'paid' && result.id) {
+        await transactionService.updateTransactionStatus(result.id, 'paid');
       }
 
       showToast('Expense added successfully', 'success');
@@ -182,33 +188,39 @@ export default function Expenses() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Date
-                </label>
-                <input
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                  required
-                />
+              <div className="flex items-center space-x-4">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Payment Status
+                  </label>
+                  <div className="mt-2">
+                    <label className="inline-flex items-center">
+                      <input
+                        type="radio"
+                        className="form-radio text-blue-600"
+                        name="status"
+                        value="paid"
+                        checked={formData.status === 'paid'}
+                        onChange={(e) => setFormData({ ...formData, status: 'paid' })}
+                      />
+                      <span className="ml-2 text-gray-700 dark:text-gray-300">Paid</span>
+                    </label>
+                    <label className="inline-flex items-center ml-6">
+                      <input
+                        type="radio"
+                        className="form-radio text-blue-600"
+                        name="status"
+                        value="pending"
+                        checked={formData.status === 'pending'}
+                        onChange={(e) => setFormData({ ...formData, status: 'pending' })}
+                      />
+                      <span className="ml-2 text-gray-700 dark:text-gray-300">Unpaid</span>
+                    </label>
+                  </div>
+                </div>
               </div>
 
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="is_recurring"
-                  checked={formData.is_recurring}
-                  onChange={(e) => setFormData({ ...formData, is_recurring: e.target.checked })}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="is_recurring" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
-                  Recurring Expense
-                </label>
-              </div>
-
-              {formData.is_recurring && (
+              {formData.status === 'pending' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Due Date
@@ -222,6 +234,19 @@ export default function Expenses() {
                   />
                 </div>
               )}
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="is_recurring"
+                  checked={formData.is_recurring}
+                  onChange={(e) => setFormData({ ...formData, is_recurring: e.target.checked })}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="is_recurring" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+                  Recurring Expense
+                </label>
+              </div>
 
               <button
                 type="submit"
@@ -258,9 +283,11 @@ export default function Expenses() {
                         <h3 className="font-medium text-gray-900 dark:text-white">
                           {expense.description || 'Untitled Expense'}
                         </h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {new Date(expense.date).toLocaleDateString()}
-                        </p>
+                        {expense.status === 'pending' && (
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Due: {new Date(expense.due_date || expense.date).toLocaleDateString()}
+                          </p>
+                        )}
                         <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full mt-1 ${
                           financialCategoryService.getCategoryColor(expense.category)
                         }`}>
@@ -288,6 +315,9 @@ export default function Expenses() {
                           role="switch"
                           aria-checked={expense.status === 'paid'}
                         >
+                          <span className="sr-only">
+                            {expense.status === 'paid' ? 'Mark as unpaid' : 'Mark as paid'}
+                          </span>
                           <span
                             aria-hidden="true"
                             className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${

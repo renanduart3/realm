@@ -45,7 +45,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     { 
       path: '/products', 
       icon: <ShoppingBag size={20} />, 
-      label: 'Produtos',
+      label: 'Produtos/Serviços',
       show: config?.organization_type === 'profit'
     },
     { 

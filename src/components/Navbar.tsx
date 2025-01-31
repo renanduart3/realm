@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, Bell } from 'lucide-react';
+import { Menu, Bell, User, LogOut, Settings } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { Transaction } from '../model/types';
 import { transactionService } from '../services/transactionService';
 import NotificationItem from './NotificationItem';
 import { useToast } from '../hooks/useToast';
+import { useAuth } from '../contexts/AuthContext';
+import { Link } from 'react-router-dom';
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -12,9 +14,12 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
   const { theme, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
   const [notifications, setNotifications] = useState<Transaction[]>([]);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const notificationsRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -25,10 +30,13 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
   }, []);
 
   useEffect(() => {
-    // Handle clicks outside notifications dropdown
+    // Handle clicks outside dropdowns
     function handleClickOutside(event: MouseEvent) {
       if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
         setIsNotificationsOpen(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
       }
     }
 
@@ -58,6 +66,11 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    showToast('Logged out successfully', 'success');
+  };
+
   return (
     <nav className="fixed top-0 left-0 right-0 h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-50">
       <div className="h-full px-4 flex items-center justify-between">
@@ -65,7 +78,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
         <div className="flex items-center">
           <button
             onClick={onMenuClick}
-            className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 md:hidden"
           >
             <Menu size={24} />
           </button>
@@ -123,6 +136,38 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
           >
             {theme === 'dark' ? '🌞' : '🌙'}
           </button>
+
+          {/* User menu */}
+          <div className="relative" ref={userMenuRef}>
+            <button
+              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              className="flex items-center space-x-2 p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <User size={24} />
+              <span className="hidden md:block">{user?.username}</span>
+            </button>
+
+            {/* User dropdown menu */}
+            {isUserMenuOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <Link
+                  to="/settings"
+                  className="flex items-center space-x-2 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  onClick={() => setIsUserMenuOpen(false)}
+                >
+                  <Settings size={20} />
+                  <span>Settings</span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center space-x-2 px-4 py-3 text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <LogOut size={20} />
+                  <span>Logout</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </nav>
