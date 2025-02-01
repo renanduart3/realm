@@ -5,6 +5,7 @@ export interface BaseEntity {
 }
 
 export type ExpenseCategory = 'services' | 'consume' | 'others';
+export type PaymentStatus = 'pending' | 'confirmed' | 'failed' | 'cancelled';
 
 export interface SystemConfig extends BaseEntity {
     organization_type: 'profit' | 'nonprofit';
@@ -16,6 +17,16 @@ export interface SystemConfig extends BaseEntity {
     sheet_ids?: { [key: number]: string };
     is_configured: boolean;
     configured_at?: string;
+    subscription?: {
+        plan: 'free' | 'premium';
+        billing: 'monthly' | 'yearly';
+        payment_status: PaymentStatus;
+        last_payment_date?: string;
+        next_billing_date?: string;
+        stripe_subscription_id?: string;
+        stripe_customer_id?: string;
+        is_early_user?: boolean;
+    };
 }
 
 export interface ProductService extends BaseEntity {
@@ -54,9 +65,23 @@ export interface Transaction extends BaseEntity {
 
 export interface SystemUser extends BaseEntity {
     username: string;
+    email: string;
     password?: string;
     role: 'master' | 'seller';
     nature_type: 'profit' | 'nonprofit';
+    subscription?: UserSubscription;
+}
+
+export interface UserSubscription {
+    id: string;
+    status: 'active' | 'canceled' | 'past_due' | 'incomplete' | 'none';
+    plan: 'free' | 'premium';
+    interval: 'month' | 'year';
+    currentPeriodStart: string;
+    currentPeriodEnd: string;
+    cancelAtPeriodEnd: boolean;
+    stripeSubscriptionId?: string;
+    stripeCustomerId?: string;
 }
 
 export interface InvitationCode {
@@ -174,14 +199,6 @@ export interface OrganizationSetup extends SystemConfig {
     pix_key?: {
         type: 'cnpj' | 'email' | 'phone' | 'random';
         key: string;
-    };
-    subscription?: {
-        plan: 'free' | 'premium';
-        billing: 'monthly' | 'yearly';
-        is_early_user: boolean;
-        payment_status: 'pending' | 'confirmed' | 'failed';
-        last_payment_date?: string;
-        next_billing_date?: string;
     };
     integrations?: {
         google_connected?: boolean;

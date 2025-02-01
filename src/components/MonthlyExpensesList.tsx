@@ -3,7 +3,7 @@ import { Transaction, ExpenseCategory } from '../model/types';
 import { transactionService } from '../services/transactionService';
 import { financialCategoryService } from '../services/financialCategoryService';
 import { formatCurrency } from '../utils/formatters';
-import { ChevronLeft, ChevronRight, Check, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useToast } from '../hooks/useToast';
 import PaymentModal from './PaymentModal';
 
@@ -81,6 +81,12 @@ export default function MonthlyExpensesList() {
     : expenses.filter(expense => expense.category === selectedCategory);
 
   const totalAmount = filteredExpenses.reduce((sum, expense) => sum + expense.value, 0);
+  const paidAmount = filteredExpenses
+    .filter(expense => expense.status === 'paid')
+    .reduce((sum, expense) => sum + expense.value, 0);
+  const pendingAmount = filteredExpenses
+    .filter(expense => expense.status === 'pending')
+    .reduce((sum, expense) => sum + expense.value, 0);
 
   return (
     <div className="space-y-6">
@@ -134,13 +140,36 @@ export default function MonthlyExpensesList() {
         </div>
       </div>
 
-      {/* Total Amount */}
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-        <div className="text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Total Amount</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
-            {formatCurrency(totalAmount)}
-          </p>
+      {/* Amount Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Total Amount */}
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+          <div className="text-center">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Total Amount</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {formatCurrency(totalAmount)}
+            </p>
+          </div>
+        </div>
+
+        {/* Paid Amount */}
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+          <div className="text-center">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Paid</p>
+            <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+              {formatCurrency(paidAmount)}
+            </p>
+          </div>
+        </div>
+
+        {/* Pending Amount */}
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+          <div className="text-center">
+            <p className="text-sm text-gray-500 dark:text-gray-400">To Pay</p>
+            <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+              {formatCurrency(pendingAmount)}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -162,9 +191,11 @@ export default function MonthlyExpensesList() {
                     <h3 className="font-medium text-gray-900 dark:text-white">
                       {expense.description || 'Untitled Expense'}
                     </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(expense.date).toLocaleDateString()}
-                    </p>
+                    {expense.status === 'pending' && (
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Due: {new Date(expense.due_date || expense.date).toLocaleDateString()}
+                      </p>
+                    )}
                     <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full mt-1 ${
                       financialCategoryService.getCategoryColor(expense.category)
                     }`}>
@@ -184,14 +215,23 @@ export default function MonthlyExpensesList() {
                     </div>
                     <button
                       onClick={() => handlePaymentToggle(expense)}
-                      className={`p-2 rounded-full ${
+                      className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                         expense.status === 'paid'
-                          ? 'bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400'
-                          : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                          ? 'bg-green-500'
+                          : 'bg-gray-200 dark:bg-gray-700'
                       }`}
-                      title={expense.status === 'paid' ? 'Mark as unpaid' : 'Mark as paid'}
+                      role="switch"
+                      aria-checked={expense.status === 'paid'}
                     >
-                      {expense.status === 'paid' ? <Check size={16} /> : <X size={16} />}
+                      <span className="sr-only">
+                        {expense.status === 'paid' ? 'Mark as unpaid' : 'Mark as paid'}
+                      </span>
+                      <span
+                        aria-hidden="true"
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                          expense.status === 'paid' ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
                     </button>
                   </div>
                 </div>
