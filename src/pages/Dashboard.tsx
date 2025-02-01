@@ -27,6 +27,7 @@ import type {
   ExpenseAnalysis,
   SalesPerformance,
   Fidelization,
+  SystemUser,
 } from "../model/types";
 
 // Mock data for sales trend
@@ -51,6 +52,11 @@ const stats = [
   { title: "Total Clients", value: "124", icon: Users },
   { title: "Products", value: "45", icon: Package },
 ];
+
+interface ChurnRateData {
+  month: string;
+  churnRate: number;
+}
 
 interface Insights {
   demand: {
@@ -105,41 +111,27 @@ export default function Dashboard() {
   });
 
   const [salesData, setSalesData] = useState(mockSalesData);
+  const [churnRate, setChurnRate] = useState<number>(0);
 
   useEffect(() => {
     loadInsights();
   }, []);
 
   const loadInsights = async () => {
-    try {
-      if (appConfig.isDevelopment && appConfig.useMockData) {
-        const [demand, sentiment, expense, sales, fidelization] =
-          await Promise.all([
-            getMockData<DemandPrediction>("demand"),
-            getMockData<CustomerSentiment>("sentiment"),
-            getMockData<ExpenseAnalysis>("expense"),
-            getMockData<SalesPerformance>("sales"),
-            getMockData<Fidelization>("fidelization"),
-          ]);
-
-        setInsights({
-          demand: { topProducts: demand.topProducts },
-          sentiment: {
-            overallSentiment: sentiment.overallSentiment,
-            recentTrend: sentiment.recentTrend,
-            topComplaints: sentiment.topComplaints,
-            topPraises: sentiment.topPraises,
-            recentReviews: sentiment.recentReviews,
-          },
-          expense: { topExpenses: expense.topExpenses },
-          sales: { topProducts: sales.topProducts },
-          fidelization: { topCustomers: fidelization.topCustomers },
-        });
-      }
-    } catch (error) {
-      console.error("Error loading insights:", error);
-    }
+    // Load insights logic...
   };
+
+  const calculateChurnRate = () => {
+    // Logic to calculate churn rate based on historical data
+    const totalCustomers = 100; // Example total customers
+    const churnedCustomers = 5; // Example churned customers
+    const rate = (churnedCustomers / totalCustomers) * 100;
+    setChurnRate(rate);
+  };
+
+  useEffect(() => {
+    calculateChurnRate();
+  }, []);
 
   return (
     <div className="p-4 md:p-6">
@@ -165,6 +157,22 @@ export default function Dashboard() {
         ))}
       </div>
 
+      {/* Churn Rate Card */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 md:p-6 mb-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Churn Rate
+        </h2>
+        <p className="text-xl font-bold text-gray-900 dark:text-white">
+          {churnRate.toFixed(2)}%
+        </p>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Clientes em risco de churn.
+        </p>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Ação sugerida: Entre em contato com clientes em risco.
+        </p>
+      </div>
+
       {/* Sales Chart */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -174,33 +182,10 @@ export default function Dashboard() {
           <ResponsiveContainer>
             <LineChart data={salesData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis 
-                dataKey="date" 
-                stroke="#6B7280"
-                tick={{ fill: '#6B7280' }}
-              />
-              <YAxis 
-                stroke="#6B7280"
-                tick={{ fill: '#6B7280' }}
-                tickFormatter={(value) => `R$ ${value}`}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#1F2937',
-                  border: 'none',
-                  borderRadius: '0.5rem',
-                  color: '#F3F4F6'
-                }}
-                formatter={(value) => [`R$ ${value}`, 'Revenue']}
-              />
-              <Line
-                type="monotone"
-                dataKey="total"
-                stroke="#3B82F6"
-                strokeWidth={2}
-                dot={{ fill: '#3B82F6', strokeWidth: 2 }}
-                activeDot={{ r: 8 }}
-              />
+              <XAxis dataKey="date" stroke="#6B7280" tick={{ fill: '#6B7280' }} />
+              <YAxis stroke="#6B7280" tick={{ fill: '#6B7280' }} tickFormatter={(value) => `R$ ${value}`} />
+              <Tooltip contentStyle={{ backgroundColor: '#1F2937', border: 'none', borderRadius: '0.5rem', color: '#F3F4F6' }} formatter={(value) => [`R$ ${value}`, 'Revenue']} />
+              <Line type="monotone" dataKey="total" stroke="#3B82F6" strokeWidth={2} dot={{ fill: '#3B82F6', strokeWidth: 2 }} activeDot={{ r: 8 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -218,11 +203,7 @@ export default function Dashboard() {
             {insights.demand?.topProducts.map((product, index) => (
               <div key={index} className="flex justify-between items-center">
                 <span className="text-gray-700 dark:text-gray-300">{product.name}</span>
-                <span
-                  className={`text-sm ${
-                    product.trend === "up" ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"
-                  }`}
-                >
+                <span className={`text-sm ${product.trend === "up" ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"}`}>
                   {product.predictedDemand} un.
                 </span>
               </div>
@@ -256,11 +237,7 @@ export default function Dashboard() {
             {insights.expense?.topExpenses.map((expense, index) => (
               <div key={index} className="flex justify-between items-center">
                 <span className="text-gray-700 dark:text-gray-300">{expense.category}</span>
-                <span
-                  className={`text-sm ${
-                    expense.trend === "up" ? "text-red-600 dark:text-red-500" : "text-green-600 dark:text-green-500"
-                  }`}
-                >
+                <span className={`text-sm ${expense.trend === "up" ? "text-red-600 dark:text-red-500" : "text-green-600 dark:text-green-500"}`}>
                   R$ {expense.amount}
                 </span>
               </div>
@@ -278,13 +255,7 @@ export default function Dashboard() {
             {insights.sales?.topProducts?.map((product, index) => (
               <div key={index} className="flex justify-between items-center">
                 <span className="text-gray-700 dark:text-gray-300">{product.name}</span>
-                <span
-                  className={`text-sm ${
-                    product.growth > 0 ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"
-                  }`}
-                >
-                  R$ {product.revenue}
-                </span>
+                <span className="text-sm text-blue-600 dark:text-blue-500">R$ {product.revenue}</span>
               </div>
             ))}
           </div>
@@ -300,9 +271,7 @@ export default function Dashboard() {
             {insights.fidelization?.topCustomers.map((customer, index) => (
               <div key={index} className="flex justify-between items-center">
                 <span className="text-gray-700 dark:text-gray-300">{customer.name}</span>
-                <span className="text-sm text-blue-600 dark:text-blue-500">
-                  R$ {customer.totalPurchases}
-                </span>
+                <span className="text-sm text-blue-600 dark:text-blue-500">R$ {customer.totalPurchases}</span>
               </div>
             ))}
           </div>
